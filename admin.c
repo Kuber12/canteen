@@ -8,6 +8,7 @@ void printMenu();
 void enterChoice();
 void dashboard(char activeUser[]);
 void maskpassword(char mskpw[]);
+void adminDashboard();
 FILE *fptr;
 struct userdata {
 	char name[50];
@@ -61,7 +62,6 @@ void signUp() {
 			goto emailExists;
 		}
 	}
-
 	passwordIncorrect:
 	printf("Enter your password:\n");
 	fflush(stdin);
@@ -124,7 +124,7 @@ void enterChoice(){
 
 void dashboard(char activeUser[]){
 	fclose(fptr);
-	printf("\nWelcome to dashboard, %s",activeUser);
+	adminDashboard();
 }
 
 void maskpassword(char mskpw[]){
@@ -141,8 +141,12 @@ void maskpassword(char mskpw[]){
 			printf("\b \b");
 		}
 		else{
-			mskpw[i++]=pw;
+			mskpw[i++]=pw;  
 			printf("*");
 		}
 	}
+}
+void adminDashboard(){
+	printf("Welcome to the admin dashboard");
+	
 }
