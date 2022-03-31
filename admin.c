@@ -5,19 +5,26 @@
 void signUp();
 void signIn();
 void printMenu();
+void menuCreator();
 void enterChoice();
 void dashboard(char activeUser[]);
 void maskpassword(char mskpw[]);
-void adminDashboard();
+int dashboardChoice();
 FILE *fptr;
-struct userdata {
+struct userdata{
 	char name[50];
 	char email[50];
 	char password[50];
 	int status;
 }receive,send;
+struct menu{
+	char canteenName[50];
+	char item[50];
+	int price;
+};
 int main(){
 	while(1){
+		mainmenu:
 		printMenu();
 		enterChoice();
 		getch();
@@ -47,19 +54,35 @@ void signIn() {
 	fclose(fptr);
 }
 void signUp() {
-	char retype[50];
+	char temp[50];
+	int i,count;
 	printf("Enter your full name:\n");
 	fflush(stdin);
 	gets(send.name);
-	emailExists:
+	retypeEmail:
 	printf("Enter your email:\n");
 	fflush(stdin);
-	gets(send.email);
+	strcpy(temp,gets(send.email));
+	i=0;
+	count=0;
+	for(i;i<=strlen(temp);i++){					//email validator for now//
+		if(temp[i]=='@'){
+			count++;
+		}
+	}
+	printf("%d",count);
+	if(count == 1){									
+		printf("its a valid email noice man\n");
+	}else{
+		printf("envter a valid email you noob\n");
+		goto retypeEmail;
+	}
+	
 	fptr = fopen("userdata.txt","r");
 	while(fread(&receive,sizeof(struct userdata),1,fptr)){
 		if(strcmp(send.email,receive.email)==0){
 			printf("Email already exists.\n");
-			goto emailExists;
+			goto retypeEmail;
 		}
 	}
 	passwordIncorrect:
@@ -67,8 +90,8 @@ void signUp() {
 	fflush(stdin);
 	maskpassword(send.password);
 	printf("\nRetype your password\n");
-	maskpassword(retype);
-	if(strcmp(send.password,retype)==0){
+	maskpassword(temp);
+	if(strcmp(send.password,temp)==0){
 		puts("\nYou are now registered.\n");
 		fptr=fopen("userdata.txt","a+");
 		fwrite(&send,sizeof(struct userdata),1,fptr);
@@ -80,6 +103,7 @@ void signUp() {
 		printf("\nPassword do not match\n Please retype\n");
 		goto passwordIncorrect;
 	}
+	
 }
 void printMenu(){
 	printf("\n\tMENU DEMONSTRATION");
@@ -124,9 +148,45 @@ void enterChoice(){
 
 void dashboard(char activeUser[]){
 	fclose(fptr);
-	adminDashboard();
+	int e = 1;
+	while(e){
+		system("cls");
+		printf("Welcome to the dashboard, %s\n",activeUser);
+		printf("Enter your choice:\n");
+		puts("Press 1 to add menu\nPress2 for ...\nPress 0 to exit to mainmenu");
+		e = dashboardChoice();
+	}
 }
 
+int dashboardChoice(){
+	char ch;
+	ch = getchar();
+	switch(ch){
+		case '1':
+			menuCreator();
+			getch();
+			break;
+		case '2':
+			printf("On maintainance");
+			getch();
+			break;
+		case '0':
+			return 0;
+			break;
+		case '\n':
+			printf("Press any key to continue");
+			getch();
+			break;
+		default:
+			printf("Invalid choice");
+			break;
+	}
+	
+}
+
+void menuCreator(){
+	printf("we create menu here");
+}
 void maskpassword(char mskpw[]){
 	int i=0;
 	char pw;
@@ -145,8 +205,4 @@ void maskpassword(char mskpw[]){
 			printf("*");
 		}
 	}
-}
-void adminDashboard(){
-	printf("Welcome to the admin dashboard");
-	
 }
