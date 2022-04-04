@@ -7,10 +7,12 @@ void signIn();
 void printMenu();
 void menuCreator();
 void enterChoice();
-void dashboard(char activeUser[]);
+void dashboard(char activeUser[],char activeEmail[]);
 void maskpassword(char mskpw[]);
-int dashboardChoice();
+int dashboardChoice(char activeEmail[]);
+void addItems(char cName[50]);
 FILE *fptr;
+
 struct userdata{
 	char name[50];
 	char email[50];
@@ -18,11 +20,11 @@ struct userdata{
 	int status;
 }receive,send;
 struct menu{
-	char canteenName[50];
-	char item[50];
-	int price;
-};
+	char item[20];
+	char price[6];
+}r;
 int main(){
+	system("color 1B");
 	while(1){
 		mainmenu:
 		printMenu();
@@ -45,7 +47,7 @@ void signIn() {
 	fptr = fopen("userdata.txt","r");
 	while(fread(&receive,sizeof(struct userdata),1,fptr)){
 		if(strcmp(userEmail,receive.email)==0 && strcmp(userPassword,receive.password)==0){
-			dashboard(receive.name);
+			dashboard(receive.name,receive.email);
 			goto loginclose;
 		}
 	}
@@ -146,7 +148,7 @@ void enterChoice(){
 		}
 }
 
-void dashboard(char activeUser[]){
+void dashboard(char activeUser[],char activeEmail[]){
 	fclose(fptr);
 	int e = 1;
 	while(e){
@@ -154,11 +156,11 @@ void dashboard(char activeUser[]){
 		printf("Welcome to the dashboard, %s\n",activeUser);
 		printf("Enter your choice:\n");
 		puts("Press 1 to add menu\nPress2 for ...\nPress 0 to exit to mainmenu");
-		e = dashboardChoice();
+		e = dashboardChoice(activeEmail);
 	}
 }
 
-int dashboardChoice(){
+int dashboardChoice(char activeEmail[]){
 	char ch;
 	ch = getchar();
 	switch(ch){
@@ -185,7 +187,27 @@ int dashboardChoice(){
 }
 
 void menuCreator(){
-	printf("we create menu here");
+	char temp[50];
+	printf("Welcome to Menu Generator");
+	printf("Enter the name of your canteen");
+	scanf("%s",&temp);
+	char* extention = ".txt";							//this creates a file //
+	fptr=fopen(strcat(temp,extention),"a+");
+	fclose(fptr);
+	addItems(temp);
+}
+void addItems(char cName[50]){
+	char* extention = ".txt";
+	puts("Enter your item: ");
+	fflush(stdin);
+	gets(r.item);
+	puts("Enter the price for your item: ");
+	fflush(stdin);
+	gets(r.price);
+	fptr=fopen(strcat(cName,extention),"a+");
+	fwrite(&send,sizeof(struct menu),1,fptr);
+	fclose(fptr);
+
 }
 void maskpassword(char mskpw[]){
 	int i=0;
