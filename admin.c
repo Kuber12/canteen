@@ -5,28 +5,30 @@
 void signUp();
 void signIn();
 void printMenu();
-void menuCreator();
 void enterChoice();
-void dashboard(char activeUser[],char activeEmail[]);
+void dashboard();
 void maskpassword(char mskpw[]);
-int dashboardChoice(char activeEmail[]);
-void addItems(char cName[50]);
+char activeUserName[50];
+char activeUserEmail[50];
+char emailBeforeA[50];
+int dashboardChoice();
+void menuCreator();
+void viewMenu();
+char* extention = ".txt";
+char *ptr;
 FILE *fptr;
-
-struct userdata{
+struct userdata {
 	char name[50];
 	char email[50];
 	char password[50];
 	int status;
 }receive,send;
 struct menu{
-	char item[20];
-	char price[6];
+	char item[10];
+	char price[10];	
 }r;
 int main(){
-	system("color 1B");
 	while(1){
-		mainmenu:
 		printMenu();
 		enterChoice();
 		getch();
@@ -47,7 +49,10 @@ void signIn() {
 	fptr = fopen("userdata.txt","r");
 	while(fread(&receive,sizeof(struct userdata),1,fptr)){
 		if(strcmp(userEmail,receive.email)==0 && strcmp(userPassword,receive.password)==0){
-			dashboard(receive.name,receive.email);
+			strcpy(activeUserEmail,receive.email);
+			strcpy(activeUserName,receive.name);
+			strcat(activeUserEmail,extention);
+			dashboard();
 			goto loginclose;
 		}
 	}
@@ -56,61 +61,48 @@ void signIn() {
 	fclose(fptr);
 }
 void signUp() {
-	char temp[50];
-	int i,count;
+	char retype[50];
 	printf("Enter your full name:\n");
 	fflush(stdin);
 	gets(send.name);
-	retypeEmail:
+	emailExists:
 	printf("Enter your email:\n");
 	fflush(stdin);
-	strcpy(temp,gets(send.email));
-	i=0;
-	count=0;
-	for(i;i<=strlen(temp);i++){					//email validator for now//
-		if(temp[i]=='@'){
-			count++;
-		}
-	}
-	printf("%d",count);
-	if(count == 1){									
-		printf("its a valid email noice man\n");
-	}else{
-		printf("envter a valid email you noob\n");
-		goto retypeEmail;
-	}
-	
+	gets(send.email);
 	fptr = fopen("userdata.txt","r");
 	while(fread(&receive,sizeof(struct userdata),1,fptr)){
 		if(strcmp(send.email,receive.email)==0){
 			printf("Email already exists.\n");
-			goto retypeEmail;
+			goto emailExists;
 		}
 	}
+
 	passwordIncorrect:
 	printf("Enter your password:\n");
 	fflush(stdin);
 	maskpassword(send.password);
 	printf("\nRetype your password\n");
-	maskpassword(temp);
-	if(strcmp(send.password,temp)==0){
+	maskpassword(retype);
+	if(strcmp(send.password,retype)==0){
 		puts("\nYou are now registered.\n");
 		fptr=fopen("userdata.txt","a+");
 		fwrite(&send,sizeof(struct userdata),1,fptr);
 		fclose(fptr);
-		char* extention = ".txt";							//this creates a file //
-		fptr=fopen(strcat(send.email,extention),"a+");
+		//ptr = strchr(send.email, '@');
+		//if (ptr != NULL) {
+	    //	*ptr = '\0';
+		//}
+		fptr=fopen(strcat(send.email,extention),"a+");    //this creates a file //
 		fclose(fptr);
 	}else{
 		printf("\nPassword do not match\n Please retype\n");
 		goto passwordIncorrect;
 	}
-	
 }
 void printMenu(){
-	printf("\n\tMENU DEMONSTRATION");
+	printf("\n\tADMIN PANEL");
 	printf("\n\t------------------------------");
-	printf("\n\n\t Choose your opetion:\n");
+	printf("\n\n\t Choose your option:\n");
 	printf("\n\t r to register:");
 	printf("\n\t s to sign in:");
 	printf("\n\t w to view all user data:");
@@ -148,67 +140,18 @@ void enterChoice(){
 		}
 }
 
-void dashboard(char activeUser[],char activeEmail[]){
+void dashboard(){
 	fclose(fptr);
 	int e = 1;
 	while(e){
 		system("cls");
-		printf("Welcome to the dashboard, %s\n",activeUser);
+		printf("Welcome to the dashboard, %s\n",activeUserName);
 		printf("Enter your choice:\n");
 		puts("Press 1 to add menu\nPress2 for ...\nPress 0 to exit to mainmenu");
-		e = dashboardChoice(activeEmail);
-	}
+		e = dashboardChoice();
+	}	
 }
 
-int dashboardChoice(char activeEmail[]){
-	char ch;
-	ch = getchar();
-	switch(ch){
-		case '1':
-			menuCreator();
-			getch();
-			break;
-		case '2':
-			printf("On maintainance");
-			getch();
-			break;
-		case '0':
-			return 0;
-			break;
-		case '\n':
-			printf("Press any key to continue");
-			getch();
-			break;
-		default:
-			printf("Invalid choice");
-			break;
-	}
-	
-}
-
-void menuCreator(){
-	char temp[50];
-	printf("Welcome to Menu Generator");
-	printf("Enter the name of your canteen");
-	scanf("%s",&temp);
-	char* extention = ".txt";							//this creates a file //
-	fptr=fopen(strcat(temp,extention),"a+");
-	fclose(fptr);
-	addItems(temp);
-}
-void addItems(char cName[50]){
-	char* extention = ".txt";
-	puts("Enter your item: ");
-	fflush(stdin);
-	gets(r.item);
-	puts("Enter the price for your item: ");
-	fflush(stdin);
-	gets(r.price);
-	fptr=fopen(strcat(cName,extention),"a+");
-	fwrite(&send,sizeof(struct menu),1,fptr);
-	fclose(fptr);
-
-}
 void maskpassword(char mskpw[]){
 	int i=0;
 	char pw;
@@ -223,8 +166,64 @@ void maskpassword(char mskpw[]){
 			printf("\b \b");
 		}
 		else{
-			mskpw[i++]=pw;  
+			mskpw[i++]=pw;
 			printf("*");
 		}
 	}
+}
+void menuCreator(){
+	system("cls");
+	char yn;
+	fptr=fopen(activeUserEmail,"a+");
+	printf("Welcome to Menu Generator %s,\n",activeUserName);
+	addMore:
+	puts("Enter your item: ");
+	fflush(stdin);
+	gets(r.item);
+	puts("Enter the price for your item: ");
+	fflush(stdin);
+	gets(r.price);
+	fwrite(&r,sizeof(struct menu),1,fptr);
+	printf("press y if you want to continue adding more items\n");
+	scanf("%c",&yn);
+	if(yn == 'y' || yn=='Y'){
+		goto addMore;
+	}else{
+		printf("Items added successfully");
+	}
+	fclose(fptr);
+}
+void viewMenu(){
+	system("cls");
+	fptr = fopen(activeUserEmail,"r");
+	printf("\nHi %s, this is our menu today. Looks good?\n",activeUserName);
+	printf("\n\t------------------------------\n");
+	while(fread(&r,sizeof(struct menu),1,fptr)){
+		printf("\t%s\t|\t%s\n",r.item,r.price);
+	}
+}
+int dashboardChoice(){
+	char ch;
+	ch = getchar();
+	switch(ch){
+		case '1':
+			menuCreator();
+			getch();
+			break;
+		case '2':
+			viewMenu();
+			getch();
+			break;
+		case '0':
+			return 0;
+			break;
+		case '\n':
+			printf("Press any key to continue");
+			getch();
+			break;
+		default:
+			printf("Invalid choice");
+			break;
+	}
+	
 }
