@@ -14,6 +14,8 @@ char emailBeforeA[50];
 int dashboardChoice();
 void menuCreator();
 void viewMenu();
+void adminInterface();
+void userInterface();
 char* extention = ".txt";
 char *ptr;
 FILE *fptr;
@@ -28,15 +30,18 @@ struct menu{
 	char price[10];	
 }r;
 int main(){
+	printf("Are you a admin or a user?\n1. F");
+	return 0;
+}
+void adminInterface(){
 	while(1){
 		printMenu();
 		enterChoice();
 		getch();
 		system("cls");
 	}
-	return 0;
 }
-	
+
 void signIn() {
 	char userEmail[50];
 	char userPassword[50];
@@ -51,7 +56,12 @@ void signIn() {
 		if(strcmp(userEmail,receive.email)==0 && strcmp(userPassword,receive.password)==0){
 			strcpy(activeUserEmail,receive.email);
 			strcpy(activeUserName,receive.name);
+			ptr = strchr(activeUserEmail, '@');  //this removes @
+			if (ptr != NULL) {
+			    *ptr = '\0';
+			}
 			strcat(activeUserEmail,extention);
+			getch();
 			dashboard();
 			goto loginclose;
 		}
@@ -61,22 +71,37 @@ void signIn() {
 	fclose(fptr);
 }
 void signUp() {
+	int i,count;
 	char retype[50];
+	char temp[50];
 	printf("Enter your full name:\n");
 	fflush(stdin);
 	gets(send.name);
-	emailExists:
+	retypeEmail:
 	printf("Enter your email:\n");
-	fflush(stdin);
-	gets(send.email);
+	fflush(stdin);	
+	strcpy(temp,gets(send.email));
+	i=0;
+	count=0;
+	for(i;i<=strlen(temp);i++){					//email validator for now//
+		if(temp[i]=='@'){
+			count++;
+		}
+	}
+	if(count == 1){									
+		printf("its a valid email noice man\n");
+	}else{
+		printf("envter a valid email you noob\n");
+		goto retypeEmail;
+	}
+	
 	fptr = fopen("userdata.txt","r");
 	while(fread(&receive,sizeof(struct userdata),1,fptr)){
 		if(strcmp(send.email,receive.email)==0){
 			printf("Email already exists.\n");
-			goto emailExists;
+			goto retypeEmail;
 		}
 	}
-
 	passwordIncorrect:
 	printf("Enter your password:\n");
 	fflush(stdin);
@@ -85,14 +110,20 @@ void signUp() {
 	maskpassword(retype);
 	if(strcmp(send.password,retype)==0){
 		puts("\nYou are now registered.\n");
+		strcpy(activeUserEmail,send.email);
+		strcpy(activeUserName,send.name);
+		
 		fptr=fopen("userdata.txt","a+");
+		
 		fwrite(&send,sizeof(struct userdata),1,fptr);
 		fclose(fptr);
-		//ptr = strchr(send.email, '@');
-		//if (ptr != NULL) {
-	    //	*ptr = '\0';
-		//}
-		fptr=fopen(strcat(send.email,extention),"a+");    //this creates a file //
+		ptr = strchr(activeUserEmail, '@');  //this removes @
+		if (ptr != NULL) {
+		    *ptr = '\0';
+		}
+		
+		fptr=fopen(strcat(activeUserEmail,extention),"a+");//this creates a file //
+		printf("%s",activeUserEmail);
 		fclose(fptr);
 	}else{
 		printf("\nPassword do not match\n Please retype\n");
@@ -149,9 +180,8 @@ void dashboard(){
 		printf("Enter your choice:\n");
 		puts("Press 1 to add menu\nPress2 for ...\nPress 0 to exit to mainmenu");
 		e = dashboardChoice();
-	}	
+	}
 }
-
 void maskpassword(char mskpw[]){
 	int i=0;
 	char pw;
